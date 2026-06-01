@@ -46,6 +46,22 @@ npm run dev
 
 若後端不是在 `localhost:8000`，可設定 `VITE_API_BASE` 指向 API base URL。
 
+
+## GitHub Pages 部署與線上版限制
+
+本專案已設定 GitHub Pages 前端部署，push 到 `main` 分支後會自動建置 `frontend`，並將 `frontend/dist` 部署到：
+
+<https://zhting-twn.github.io/Stock/>
+
+GitHub Pages 只能展示前端靜態頁面，不能執行 FastAPI 後端。因此若只部署 GitHub Pages，股價查詢、基本面分析、回測、定期定額，以及其他需要呼叫 `/api` 的功能不會在線上正常運作。
+
+若要讓股價查詢、基本面分析、回測、定期定額 API 在線上正常運作，需要另外部署 `backend`。後端可部署到 Render、Railway、Fly.io 或其他支援 Python FastAPI 的平台。部署後請在 `frontend` build 時設定 `VITE_API_BASE` 為後端 API 網址，例如：
+
+```bash
+cd frontend
+VITE_API_BASE=https://your-backend.example.com npm run build
+```
+
 ## 主要功能
 
 1. **首頁儀表板**：系統簡介、常用股票、近期查詢紀錄、投資試算摘要、回測摘要與風險提醒。
