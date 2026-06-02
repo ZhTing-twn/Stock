@@ -3,7 +3,35 @@ import { api } from '../services/api';
 import { BarBox, ErrorBox, LineBox, Loading, money, pct, PieBox, SelectInput, SortTable, Stat, TextInput } from '../components/UI';
 const today='2026-06-01'; const startDefault='2024-01-01';
 function useAsync<T>(fn:()=>Promise<T>){const [data,setData]=useState<T|null>(null),[loading,setLoading]=useState(false),[error,setError]=useState(''); const run=()=>{setLoading(true);setError('');fn().then(setData).catch(e=>setError(e.message)).finally(()=>setLoading(false))}; return {data,loading,error,run,setData};}
-export function Dashboard(){const [recent,setRecent]=useState<string[]>(JSON.parse(localStorage.getItem('recentSymbols')||'[]')); return <div className="space-y-5"><h2 className="title">首頁儀表板</h2><div className="card"><p>本系統整合股價查詢、定期定額試算、目標金額反推、投資組合回測、技術指標與景氣信號燈，適合學生專題展示與投資歷史資料整理。</p><p className="mt-2 text-rose-700 font-medium">風險提醒：歷史資料不代表未來結果；本系統不提供個別操作建議或結果承諾。</p></div><div className="grid md:grid-cols-3 gap-4"><Stat label="常用股票" value="2330.TW / 0050.TW / VOO / QQQ / AAPL"/><Stat label="投資試算摘要" value="支援費用、匯率、整股/零股/小數股"/><Stat label="回測摘要" value="報酬、波動、Sharpe、回撤、月年報酬"/></div><div className="card"><h3 className="font-bold mb-2">近期查詢紀錄</h3>{recent.length?recent.map(s=><button className="mr-2 mb-2 rounded-full bg-slate-100 px-3 py-1" onClick={()=>setRecent(recent.filter(x=>x!==s))} key={s}>{s} ×</button>):<p className="muted">尚無紀錄，請至股票查詢頁開始。</p>}</div></div>}
+export function Dashboard(){
+  const [recent,setRecent]=useState<string[]>(JSON.parse(localStorage.getItem('recentSymbols')||'[]'));
+  return <div className="space-y-5">
+    <h2 className="title">首頁儀表板</h2>
+    <div className="card">
+      <p>本系統整合股價查詢、定期定額試算、目標金額反推、投資組合回測、技術指標與景氣信號燈，適合學生專題展示與投資歷史資料整理。</p>
+      <p className="mt-2 text-rose-700 font-medium">風險提醒：歷史資料不代表未來結果；本系統不提供個別操作建議或結果承諾。</p>
+    </div>
+    <div className="rounded-xl border border-sky-200 bg-sky-50 p-4 text-sky-900">
+      <h3 className="font-bold mb-2">GitHub Pages 免費展示版提示</h3>
+      <ul className="list-disc pl-5 space-y-1 text-sm">
+        <li>目前 GitHub Pages 版為免費前端展示版。</li>
+        <li>若沒有啟動後端，股價查詢、基本面分析、回測、定期定額等 API 功能會顯示錯誤或無法取得即時資料。</li>
+        <li>本機啟動 backend 後可完整操作。</li>
+        <li>系統不會要求 API Key、信用卡、券商帳號或登入資料。</li>
+      </ul>
+    </div>
+    <div className="grid md:grid-cols-3 gap-4">
+      <Stat label="常用股票" value="2330.TW / 0050.TW / VOO / QQQ / AAPL"/>
+      <Stat label="投資試算摘要" value="支援費用、匯率、整股/零股/小數股"/>
+      <Stat label="回測摘要" value="報酬、波動、Sharpe、回撤、月年報酬"/>
+    </div>
+    <div className="card">
+      <h3 className="font-bold mb-2">近期查詢紀錄</h3>
+      {recent.length?recent.map(s=><button className="mr-2 mb-2 rounded-full bg-slate-100 px-3 py-1" onClick={()=>setRecent(recent.filter(x=>x!==s))} key={s}>{s} ×</button>):<p className="muted">尚無紀錄，請至股票查詢頁開始。</p>}
+    </div>
+  </div>
+}
+
 export function QuotePage(){const [symbol,setSymbol]=useState('AAPL'); const q=useAsync(()=>api.quote(symbol)); const h=useAsync(()=>api.history(symbol,'2025-06-01',today)); const search=()=>{const r=JSON.parse(localStorage.getItem('recentSymbols')||'[]'); localStorage.setItem('recentSymbols',JSON.stringify([symbol,...r.filter((x:string)=>x!==symbol)].slice(0,8))); q.run(); h.run();}; useEffect(search,[]); return <div className="space-y-5"><h2 className="title">股票查詢頁</h2><div className="card grid md:grid-cols-4 gap-3"><TextInput label="股票代號" value={symbol} onChange={setSymbol}/><button className="btn self-end" onClick={search}>查詢</button></div><Loading show={q.loading||h.loading}/><ErrorBox msg={q.error||h.error||q.data?.warning}/>{q.data&&<div className="grid md:grid-cols-4 gap-4"><Stat label="目前股價" value={money(q.data.price)}/><Stat label="漲跌" value={money(q.data.change)}/><Stat label="漲跌幅" value={`${q.data.change_percent.toFixed(2)}%`}/><Stat label="成交量" value={money(q.data.volume)}/><Stat label="近一年最高價" value={money(q.data.year_high)}/><Stat label="近一年最低價" value={money(q.data.year_low)}/><Stat label="資料更新時間" value={q.data.updated_at?.slice(0,10)}/><Stat label="資料來源" value={q.data.source}/></div>}{h.data&&<><LineBox title="歷史價格走勢圖" data={h.data.prices} lines={['close']}/><SortTable title="歷史價格表" data={h.data.prices}/></>}</div>}
 const defaultFees={commission_rate:0.001425,min_fee:20,tax_rate:0.003,platform_fee:0,exchange_rate:1,share_mode:'fractional'};
 function defaultDcaForm(){const entry=JSON.parse(localStorage.getItem('siaDcaEntry')||'{}'); return {symbol:entry.symbol||'0050.TW',monthly_amount:entry.monthly_amount||10000,initial_amount:entry.initial_amount||10000,start:entry.start||'2024-01-01',end:entry.end||today,buy_day:5,reinvest_dividends:false,fees:defaultFees}}
