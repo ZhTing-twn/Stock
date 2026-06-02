@@ -53,14 +53,28 @@ npm run dev
 
 <https://zhting-twn.github.io/Stock/>
 
-GitHub Pages 只能展示前端靜態頁面，不能執行 FastAPI 後端。因此若只部署 GitHub Pages，股價查詢、基本面分析、回測、定期定額，以及其他需要呼叫 `/api` 的功能不會在線上正常運作。
+GitHub Pages 只部署前端，不會執行 FastAPI 後端。若不想付費，線上版先展示前端介面與本地範例資料說明；完整即時查詢與回測可在本機啟動 `backend` 後操作。
 
-若要讓股價查詢、基本面分析、回測、定期定額 API 在線上正常運作，需要另外部署 `backend`。後端可部署到 Render、Railway、Fly.io 或其他支援 Python FastAPI 的平台。部署後請在 `frontend` build 時設定 `VITE_API_BASE` 為後端 API 網址，例如：
+若未來自行找到免費 Python 後端平台，可在 `frontend` build 時設定 `VITE_API_BASE` 指向該後端。本專案不綁定任何付費雲端服務，也不要求使用特定部署平台。
 
 ```bash
 cd frontend
-VITE_API_BASE=https://your-backend.example.com npm run build
+VITE_API_BASE=https://your-free-backend.example.com npm run build
 ```
+
+## 免費資源聲明
+
+本系統以免費資源為設計前提，適合不用付費的學生專題網站：
+
+- 前端採 GitHub Pages。
+- 資料優先採 `yfinance` 與 Yahoo Finance 公開資料。
+- 允許使用本地 SQLite 快取與本地範例資料。
+- 外部資料失敗時，系統改用本地範例資料。
+- 不接付費 API。
+- 不接券商下單。
+- 不收集個人資料。
+- 不需要 API Key。
+- 不需要信用卡。
 
 ## 主要功能
 
@@ -116,7 +130,7 @@ VITE_API_BASE=https://your-backend.example.com npm run build
 - yfinance 屬公開資料管道，可能受網路、頻率限制、資料延遲、交易所調整或欄位缺漏影響。
 - 景氣信號燈目前採本地範例資料，服務層已獨立封裝，後續可替換為正式公開資料來源。
 - 回測與技術指標以歷史資料計算，不代表未來表現。
-- 本系統不處理密碼、Token、API Key、券商帳號或個人機敏資料。
+- 本系統不處理密碼、API Key、券商帳號或個人機敏資料。
 - 本系統不提供投資建議，所有輸出僅供試算、學習與風險理解。
 
 ## 測試
